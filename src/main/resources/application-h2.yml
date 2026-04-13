@@ -22,6 +22,9 @@ spring:
   flyway:
     enabled: false  # Disable Flyway for H2
 
+  cache:
+    type: simple  # Use in-memory cache for development
+
 app:
   rate-limiting:
     enabled: false  # Disable rate limiting for development

@@ -26,6 +26,7 @@ public class Movie {
     private String description;
     private String posterUrl;
     private String trailerUrl;
+    @Column(name = "movie_cast")
     private String cast;
     private String director;
     private Double rating;
