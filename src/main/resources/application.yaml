@@ -1,0 +1,160 @@
+spring:
+  application:
+    name: movie-ticket-platform
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/movie_ticket_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        show_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+      transport:
+        protocol: smtp
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+    max-connections: 10000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+logging:
+  level:
+    com.xyz.movieticket: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: WARN
+    org.springframework.mail: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/movie-ticket-platform.log
+    max-size: 10MB
+    max-history: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: movie-ticket-platform
+
+app:
+  booking:
+    seat-reservation-timeout: 15
+    max-seats-per-booking: 10
+    cancellation-window-hours: 2
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: 86400000
+
+  payment:
+    gateway:
+      provider: stripe
+      webhook-secret: ${PAYMENT_WEBHOOK_SECRET:whsec_test}
+
+  notification:
+    email:
+      enabled: true
+      from: noreply@movieticket.com
+    sms:
+      enabled: false
+      api:
+        key: ${SMS_API_KEY:your-sms-api-key}
+        url: ${SMS_API_URL:https://api.smsgateway.com/send}
+    whatsapp:
+      enabled: false
+      api:
+        key: ${WHATSAPP_API_KEY:your-whatsapp-api-key}
+        phone-number-id: ${WHATSAPP_PHONE_ID:123456789}
+
+  rate-limiting:
+    enabled: true
+    default-per-minute: 60
+    booking-per-minute: 10
+    theatre-admin-per-minute: 30
+    use-redis: false
+    max-requests-per-minute: 60
+    booking-max-requests: 10
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: true
